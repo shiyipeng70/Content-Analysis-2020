@@ -1,0 +1,80 @@
+Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@shiyipeng70 
+Learn Git and GitHub without any code!
+Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+
+
+shiyipeng70
+/
+Content-Analysis-2020
+forked from Computational-Content-Analysis-2020/Content-Analysis-2020
+0
+040
+ Code Pull requests 0 Actions Projects 0 Wiki Security Insights Settings
+Content-Analysis-2020/week-0/hw_week_0_shipeng
+@shiyipeng70 shiyipeng70 Update hw_week_0_shipeng
+6267f4d 3 days ago
+54 lines (44 sloc)  1.43 KB
+  
+import dependencies
+import tweepy
+from tweepy import OAuthHandler
+from tweepy.streaming import StreamListener
+import json
+from tweepy import Stream
+import time
+import datetime 
+import requests
+import bs4
+from bs4 import BeautifulSoup
+import re
+import pandas as pd
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+analyzer = SentimentIntensityAnalyzer()
+
+
+base_url = 'http://twitter.com/'
+query = "BillGates"
+
+r = requests.get(base_url+query)
+soup = BeautifulSoup(r.text,'html.parser')
+
+tweets_BG = [p.text for p in soup.findAll('p',class_='tweet-text')]
+hashtags_BG =[]
+links_BG = []
+at_BG = []
+#print(tweets_BG)
+
+for tweet in tweets_BG:
+    hash_tags = re.search(r'#(\d*[A-Za-z_]+\w*)\b(?!;)',tweet)
+    link = re.search(r'https://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)',tweet)
+    at = re.search(r'@\d*?[-a-zA-Z0-9]+?\b',tweet)
+   
+    if hash_tags != None:
+        #print(hash_tags.group(0))
+        hashtags_BG.append(hash_tags.group(0))
+    if link != None:
+        #print(link)
+        links_BG.append(link.group(0))
+    if at !=None:
+        at_BG.append(at.group(0))
+       
+
+s1 = pd.Series(tweets_BG)
+s2 = pd.Series(hashtags_BG)
+s3 = pd.Series(links_BG)
+s4 = pd.Series(at_BG)
+
+df = pd.DataFrame({'text':s1.reindex(s2.index),'hashtags':s2,'links':s3.reindex(s2.index),'AT':s4.reindex(s2.index)})
+
+print(df)
+
